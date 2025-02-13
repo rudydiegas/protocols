@@ -1,0 +1,41 @@
+Interesting Notes
+- When assigning to a var in an always_ff block and casing on the var itself (like a FSM state), leaving out the default case seems to cause additional logic to be inferred
+
+                                          |------------------------- MY IMPLEMENTATION -------------------------|
+
+   |------ NO PARITY + 1 STOP -------|   |------ NO PARITY + 2 STOP -------|   |-------- PARITY + 1 STOP --------|   |-------- PARITY + 2 STOP --------|
+   Number of cells:                143   Number of cells:                146   Number of cells:                167   Number of cells:                172
+     $_ANDNOT_                      41     $_ANDNOT_                      43     $_ANDNOT_                      44     $_ANDNOT_                      45
+     $_AND_                          5     $_AND_                          4     $_AND_                          1     $_AND_                          1
+     $_DFF_P_                        2     $_DFF_P_                        2     $_DFF_P_                        3     $_DFF_P_                        3
+     $_MUX_                          2     $_MUX_                          2     ---------------------------------     ---------------------------------
+     $_NAND_                         6     $_NAND_                         7     $_NAND_                        11     $_NAND_                        11
+     $_NOR_                          8     $_NOR_                          8     $_NOR_                          9     $_NOR_                         10
+     $_NOT_                          7     $_NOT_                          7     $_NOT_                          8     $_NOT_                          8
+     $_ORNOT_                       10     $_ORNOT_                       12     $_ORNOT_                       12     $_ORNOT_                       13
+     $_OR_                          31     $_OR_                          29     $_OR_                          46     $_OR_                          47
+     $_SDFFE_PN0P_                   8     $_SDFFE_PN0P_                   8     $_SDFFE_PN0P_                   8     $_SDFFE_PN0P_                   8
+     $_SDFFE_PP0P_                   5     $_SDFFE_PP0P_                   6     $_SDFFE_PP0P_                   6     $_SDFFE_PP0P_                   7
+     $_SDFF_PP0_                     8     $_SDFF_PP0_                     8     $_SDFF_PP0_                     8     $_SDFF_PP0_                     8
+     $_XNOR_                         3     $_XNOR_                         3     $_XNOR_                         3     $_XNOR_                         3
+     $_XOR_                          7     $_XOR_                          7     $_XOR_                          8     $_XOR_                          8
+
+   |--- MEDALOTTE IMPLEMENTATION ----|   |--- SELDRIDGE IMPLEMENTATION ----|   |---- NANDLAND IMPLEMENTATION ----|   |----    224 IMPLEMENTATION   ----|
+   |---  NO PARITY + 1 STOP BIT  ----|   |---  NO PARITY + 1 STOP BIT  ----|   |---  NO PARITY + 1 STOP BIT  ----|   |---  NO PARITY + 1 STOP BIT  ----|
+   Number of cells:                185   Number of cells:                336   Number of cells:                 18   Number of cells:                155
+     $_ANDNOT_                      45     $_ANDNOT_                     124     $_ANDNOT_                       4     $_ANDNOT_                      44
+     $_AND_                          7     $_AND_                          3     $_AND_                          1     $_AND_                          4
+     ---------------------------------     ---------------------------------     $_DFFE_PP_                      1     $_DFFE_PP_                      8
+     $_DFF_P_                        3     $_DFF_P_                        5     $_DFF_P_                        4     $_DFF_P_                        4
+     $_MUX_                         16     $_MUX_                          1     ---------------------------------     $_MUX_                          6
+     $_NAND_                        10     $_NAND_                        17     ---------------------------------     $_NAND_                         2
+     $_NOR_                         13     $_NOR_                         11     $_NOR_                          4     $_NOR_                          9
+     $_NOT_                          7     $_NOT_                          5     ---------------------------------     $_NOT_                          6
+     $_ORNOT_                        8     $_ORNOT_                       20     $_ORNOT_                        1     $_ORNOT_                        6
+     $_OR_                          22     $_OR_                          95     $_OR_                           3     $_OR_                          43
+     $_SDFFE_PN0P_                  32     $_SDFFE_PN0P_                  12                                           $_SDFFCE_PP0P_                  3
+     $_SDFFE_PN1N_                   5     ---------------------------------                                           $_SDFFCE_PP1P_                  1
+     $_SDFF_PN0_                     2     $_SDFF_PN0_                    24                                           $_SDFF_PP0_                     3
+     $_SDFF_PN1_                     1     ---------------------------------                                           $_SDFF_PP1_                     1
+     $_XNOR_                         7     $_XNOR_                         3                                           $_XNOR_                         3
+     $_XOR_                          7     $_XOR_                         16                                           $_XOR_                         12
