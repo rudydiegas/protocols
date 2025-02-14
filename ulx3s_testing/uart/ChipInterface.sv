@@ -4,6 +4,8 @@ module ChipInterface (
   input  logic clk_25mhz,
   input  logic ftdi_txd,
   input  logic [6:0] btn,
+  output logic [27:0] gp,
+  output logic [27:0] gn,
   output logic ftdi_rxd,
   output logic [7:0] led
 );
@@ -16,6 +18,7 @@ module ChipInterface (
 
   assign rst_n = ~btn[5];
   assign clk = clk_25mhz;
+  assign gp[27] = ftdi_txd;
 
   always_ff @(posedge clk) begin
     if (~rst_n)
@@ -26,21 +29,10 @@ module ChipInterface (
       led <= 8'h55;
   end
 
-
-  // uart_rx #(
-  //   .CLK_FREQ(25_000_000),
-  //   .BAUD(115_200)
-  // ) DUT (
-  //   .o_data(data),
-  //   .o_valid(data_valid),
-  //   .i_in(ftdi_txd),
-  //   .i_clk(clk)
-  // );
-
   UART_RX #(
     .CLK_FREQ(25_000_000),
     .BAUD_RATE(115_200),
-    .DATA_BITS(8)
+    .DATA_BITS(5)
   ) DUT (
     .clk,
     .rst_n,

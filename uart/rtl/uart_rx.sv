@@ -1,8 +1,14 @@
 `default_nettype none
 
-// TODO: add logic for even, odd, mark, and space parity bits
+/*
+ *  Parity Type:
+ *  SPACE: 0
+ *  MARK:  1
+ *  EVEN:  2
+ *  ODD:   3
+ */
 
-// `define PARITY_BIT
+// `define PARITY_BIT 3
 // `define TWO_STOP_BITS
 
 module UART_RX #(
@@ -23,6 +29,7 @@ module UART_RX #(
   localparam DATA_IND_SIZE = $clog2(DATA_BITS);
 
   `ifdef PARITY_BIT
+    localparam PARITY_TYPE = `PARITY_BIT;
     logic parity_ff;
     enum logic [2:0] {IDLE,
                       START,
@@ -51,16 +58,21 @@ module UART_RX #(
   assign full_bit = cycle_cnt == CYCLES_PER_BIT;
   assign data_done = data_ind == (DATA_BITS - 1);
 
+  // ---------------------
+  // --- parity logic ----
+  // ---------------------
   `ifdef PARITY_BIT
     always_ff @(posedge clk) begin
-      if (~rst_n)
-        parity_ff <= '0;
-      else if (state == IDLE)
-        parity_ff <= '0;
-      else if ((state == DATA) & sample)
-        parity_ff <= parity_ff ^ serial;
-      else if ((state == PARITY) & sample)
-        parity_ff <= parity_ff ^ serial;
+      if ((PARITY_TYPE == 2) || (PARITY_TYPE == 3)) begin
+        if (~rst_n)
+          parity_ff <= '0;
+        else if (state == IDLE)
+          parity_ff <= '0;
+        else if ((state == DATA) & sample)
+          parity_ff <= parity_ff ^ serial;
+        else if ((state == PARITY) & sample)
+          parity_ff <= parity_ff ^ serial;
+      end
     end
   `endif
 
@@ -75,9 +87,25 @@ module UART_RX #(
     else if ((state == START) & sample & serial)
       error <= 1'b1;
     `ifdef PARITY_BIT
-      // TODO: hard-coded to fail on odd parity currently
-      else if ((state == PARITY) & full_bit & parity_ff)
-        error <= 1'b1;
+      else if (state == PARITY)
+        case (PARITY_TYPE)
+          2'd0: begin
+            if (sample & serial)
+              error <= 1'b1;
+          end
+          2'd1: begin
+            if (sample & ~serial)
+              error <= 1'b1;
+          end
+          2'd2: begin
+            if (full_bit & parity_ff)
+              error <= 1'b1;
+          end
+          2'd3: begin
+            if (full_bit & ~parity_ff)
+              error <= 1'b1;
+          end
+        endcase
     `endif
     else if ((state == STOP) & sample & ~serial)
       error <= 1'b1;
